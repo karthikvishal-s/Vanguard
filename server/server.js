@@ -59,6 +59,22 @@ const Message = mongoose.model('Message', MessageSchema);
 
 
 // --- SEEDING ---
+// --- HELPERS (Moved Up) ---
+const generateKeyPair = () => {
+    const keypair = forge.pki.rsa.generateKeyPair({ bits: 2048, e: 0x10001 });
+    return {
+        publicKey: forge.pki.publicKeyToPem(keypair.publicKey),
+        privateKey: forge.pki.privateKeyToPem(keypair.privateKey)
+    };
+};
+
+const getRoleName = (role) => {
+    if (role === 3) return 'COLONEL';
+    if (role === 2) return 'SERGEANT';
+    return 'SOLDIER';
+}
+
+// --- SEEDING ---
 const seedUsers = async () => {
     try {
         const count = await User.countDocuments();
@@ -67,20 +83,33 @@ const seedUsers = async () => {
             const pwhash = await bcrypt.hash('password123', 10);
             const vishalHash = await bcrypt.hash('karthikvishal', 10);
 
+            const createSeededUser = (username, email, password, role) => {
+                const keys = generateKeyPair();
+                return {
+                    username,
+                    email,
+                    password,
+                    role,
+                    roleName: getRoleName(role),
+                    publicKey: keys.publicKey,
+                    privateKey: keys.privateKey
+                };
+            };
+
             const usersToSeed = [
                 // Requested Colonel
-                { username: 'vishal', email: 'karthikvishal1506@gmail.com', password: vishalHash, role: 3, roleName: 'COLONEL' },
+                createSeededUser('vishal', 'karthikvishal1506@gmail.com', vishalHash, 3),
                 // 3 Colonels
-                { username: 'colonel', email: 'colonel@vanguard.mil', password: pwhash, role: 3, roleName: 'COLONEL' },
-                { username: 'colonel_sheppard', email: 'sheppard@vanguard.mil', password: pwhash, role: 3, roleName: 'COLONEL' },
-                { username: 'colonel_oneill', email: 'oneill@vanguard.mil', password: pwhash, role: 3, roleName: 'COLONEL' },
+                createSeededUser('colonel', 'colonel@vanguard.mil', pwhash, 3),
+                createSeededUser('colonel_sheppard', 'sheppard@vanguard.mil', pwhash, 3),
+                createSeededUser('colonel_oneill', 'oneill@vanguard.mil', pwhash, 3),
                 // 4 Sergeants
-                { username: 'sergeant', email: 'sergeant@vanguard.mil', password: pwhash, role: 2, roleName: 'SERGEANT' },
-                { username: 'sergeant_carter', email: 'carter@vanguard.mil', password: pwhash, role: 2, roleName: 'SERGEANT' },
-                { username: 'sergeant_tealc', email: 'tealc@vanguard.mil', password: pwhash, role: 2, roleName: 'SERGEANT' },
-                { username: 'sergeant_jackson', email: 'jackson@vanguard.mil', password: pwhash, role: 2, roleName: 'SERGEANT' },
+                createSeededUser('sergeant', 'sergeant@vanguard.mil', pwhash, 2),
+                createSeededUser('sergeant_carter', 'carter@vanguard.mil', pwhash, 2),
+                createSeededUser('sergeant_tealc', 'tealc@vanguard.mil', pwhash, 2),
+                createSeededUser('sergeant_jackson', 'jackson@vanguard.mil', pwhash, 2),
                 // Default Soldier
-                { username: 'soldier', email: 'soldier@vanguard.mil', password: pwhash, role: 1, roleName: 'SOLDIER' }
+                createSeededUser('soldier', 'soldier@vanguard.mil', pwhash, 1)
             ];
 
             await User.insertMany(usersToSeed);
@@ -127,7 +156,47 @@ const sendEmail = async (to, otp) => {
             from: 'VANGUARD COMMAND <no-reply@vanguard.mil>',
             to: to,
             subject: 'SECURE AUTHENTICATION TOKEN',
-            text: `COMMAND ALERT\n\nYOUR 2FA CODE IS: ${otp}\n\nTHIS MESSAGE WILL SELF-DESTRUCT IN 5 MINUTES.`
+            html: `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <style>
+                    body { background-color: #000000; color: #ffffff; font-family: 'Courier New', Courier, monospace; padding: 20px; }
+                    .container { max-width: 600px; margin: 0 auto; border: 2px solid #00f3ff; padding: 20px; background-color: #111111; color: #ffffff; }
+                    .header { border-bottom: 1px solid #00f3ff; padding-bottom: 10px; margin-bottom: 20px; text-align: center; }
+                    .title { font-size: 24px; letter-spacing: 2px; font-weight: bold; color: #ffffff; text-shadow: 0 0 10px #00f3ff; }
+                    .otp-box { background-color: #001a1a; border: 1px dashed #ffa500; padding: 20px; text-align: center; margin: 30px 0; }
+                    .otp { font-size: 36px; font-weight: bold; letter-spacing: 10px; color: #ffa500; text-shadow: 0 0 10px #ffa500; }
+                    .footer { font-size: 10px; color: #cccccc; text-align: center; margin-top: 20px; border-top: 1px solid #333; padding-top: 10px; }
+                    p { color: #ffffff !important; }
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <div class="header">
+                        <div class="title">VANGUARD COMMAND</div>
+                        <div style="font-size: 10px; color: #00f3ff;">SECURE TRANSMISSION LAYER // ENCRYPTED</div>
+                    </div>
+                    
+                    <p>ATTENTION OPERATIVE,</p>
+                    <p>A REQUEST FOR SECURE ACCESS HAS BEEN INITIATED FOR YOUR IDENTIFIER.</p>
+                    <p>AUTHENTICATE IMMEDIATELY USING THE ONE-TIME PROTOCOL TOKEN BELOW:</p>
+
+                    <div class="otp-box">
+                        <div class="otp">${otp}</div>
+                    </div>
+
+                    <p style="color: #ff3333 !important; font-size: 12px;">WARNING: THIS TOKEN EXPIRES IN 5 MINUTES.</p>
+                    <p>IF YOU DID NOT REQUEST THIS ACCESS, REPORT A SECURITY BREACH TO COMMAND IMMEDIATELY.</p>
+
+                    <div class="footer">
+                        VANGUARD SYSTEMS // MILITARY GRADE ENCRYPTION // NO FORWARDING<br>
+                        TERMINAL ID: ${crypto.randomBytes(4).toString('hex').toUpperCase()}
+                    </div>
+                </div>
+            </body>
+            </html>
+            `
         });
         console.log(`[EMAIL] SENT TO ${to}`);
         return true;
@@ -141,19 +210,7 @@ const sendEmail = async (to, otp) => {
 // --- HELPERS ---
 const generateOTP = () => Math.floor(100000 + Math.random() * 900000).toString();
 
-const getRoleName = (role) => {
-    if (role === 3) return 'COLONEL';
-    if (role === 2) return 'SERGEANT';
-    return 'SOLDIER';
-}
-
-const generateKeyPair = () => {
-    const keypair = forge.pki.rsa.generateKeyPair({ bits: 2048, e: 0x10001 });
-    return {
-        publicKey: forge.pki.publicKeyToPem(keypair.publicKey),
-        privateKey: forge.pki.privateKeyToPem(keypair.privateKey)
-    };
-};
+// moved getRoleName and generateKeyPair to top for seeding usage
 
 // --- MIDDLEWARE ---
 const verifyToken = (req, res, next) => {
@@ -341,7 +398,7 @@ app.get('/api/users/me/keys', verifyToken, async (req, res) => {
 });
 
 // Get Recipient Public Key (Colonel/Sergeant only)
-app.get('/api/users/public-key/:id', verifyToken, requireRole(2), async (req, res) => {
+app.get('/api/users/public-key/:id', verifyToken, requireRole(1), async (req, res) => {
     try {
         const user = await User.findById(req.params.id);
         if (!user) return res.status(404).json({ error: 'User not found' });
@@ -352,7 +409,7 @@ app.get('/api/users/public-key/:id', verifyToken, requireRole(2), async (req, re
 });
 
 // Send Message
-app.post('/api/messages', verifyToken, requireRole(2), async (req, res) => {
+app.post('/api/messages', verifyToken, requireRole(1), async (req, res) => {
     const { recipientId, encryptedContent, encryptedKey, salt, iv } = req.body;
 
     try {
@@ -374,7 +431,7 @@ app.post('/api/messages', verifyToken, requireRole(2), async (req, res) => {
 });
 
 // Get Inbox
-app.get('/api/messages', verifyToken, requireRole(2), async (req, res) => {
+app.get('/api/messages', verifyToken, requireRole(1), async (req, res) => {
     try {
         const messages = await Message.find({ recipient: req.user.id })
             .sort({ timestamp: -1 })
@@ -386,11 +443,11 @@ app.get('/api/messages', verifyToken, requireRole(2), async (req, res) => {
 });
 
 // Get Eligible Recipients (exclude self, include only Colonels(3) and Sergeants(2))
-app.get('/api/recipients', verifyToken, requireRole(2), async (req, res) => {
+app.get('/api/recipients', verifyToken, requireRole(1), async (req, res) => {
     try {
         const recipients = await User.find({
             _id: { $ne: req.user.id },
-            role: { $in: [2, 3] }
+            role: { $in: [1, 2, 3] }
         }, 'username roleName');
         res.json({ recipients });
     } catch (err) {

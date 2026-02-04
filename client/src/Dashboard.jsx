@@ -174,7 +174,7 @@ const Dashboard = ({ user, onLogout }) => {
 
                     <div className="my-4 border-t border-gray-700"></div>
 
-                    {user.role >= 2 && <NavBtn label="SECURE UPLINK" active={activeTab === 'messenger'} onClick={() => setActiveTab('messenger')} />}
+                    {user.role >= 1 && <NavBtn label="SECURE UPLINK" active={activeTab === 'messenger'} onClick={() => setActiveTab('messenger')} />}
                     <NavBtn label="DATA LINK (QR)" active={activeTab === 'qr'} onClick={() => setActiveTab('qr')} />
                     <NavBtn label="SECURITY BOARD" active={activeTab === 'matrix'} onClick={() => setActiveTab('matrix')} />
 
