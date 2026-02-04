@@ -58,7 +58,7 @@ function App() {
   useEffect(() => {
     const checkSession = async () => {
       try {
-        const res = await fetch('http://localhost:3001/api/me', {
+        const res = await fetch('/api/me', {
           credentials: 'include'
         });
         if (res.ok) {
@@ -78,7 +78,7 @@ function App() {
     setError('');
     setMessage('');
     try {
-      const res = await fetch('http://localhost:3001/api/login', {
+      const res = await fetch('/api/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password })
@@ -101,7 +101,7 @@ function App() {
     setError('');
     setMessage('');
     try {
-      const res = await fetch('http://localhost:3001/api/register', {
+      const res = await fetch('/api/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password })
@@ -124,7 +124,7 @@ function App() {
     e.preventDefault();
     setError('');
     try {
-      const res = await fetch('http://localhost:3001/api/verify-otp', {
+      const res = await fetch('/api/verify-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -145,7 +145,7 @@ function App() {
 
   const handleLogout = async (isAuto = false) => {
     try {
-      await fetch('http://localhost:3001/api/logout', { method: 'POST', credentials: 'include' });
+      await fetch('/api/logout', { method: 'POST', credentials: 'include' });
     } catch (e) {
       // Ignore error on logout
     }

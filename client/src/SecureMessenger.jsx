@@ -17,7 +17,7 @@ const SecureMessenger = ({ user }) => {
         const init = async () => {
             try {
                 // 1. Fetch My Keys (from Server - now pre-seeded)
-                const res = await axios.get('http://localhost:3001/api/users/me/keys', { withCredentials: true });
+                const res = await axios.get('/api/users/me/keys', { withCredentials: true });
                 const { privateKey, publicKey } = res.data;
 
                 if (privateKey && publicKey) {
@@ -45,7 +45,7 @@ const SecureMessenger = ({ user }) => {
     // --- API CALLS ---
     const fetchEligibleRecipients = async () => {
         try {
-            const res = await axios.get('http://localhost:3001/api/recipients', { withCredentials: true });
+            const res = await axios.get('/api/recipients', { withCredentials: true });
             setRecipients(res.data.recipients);
         } catch (err) {
             console.error(err);
@@ -54,7 +54,7 @@ const SecureMessenger = ({ user }) => {
 
     const fetchInbox = async () => {
         try {
-            const res = await axios.get('http://localhost:3001/api/messages', { withCredentials: true });
+            const res = await axios.get('/api/messages', { withCredentials: true });
             setMessages(res.data.messages);
         } catch (err) {
             console.error(err);
@@ -69,7 +69,7 @@ const SecureMessenger = ({ user }) => {
 
         try {
             // 1. Get Recipient Public Key
-            const keyRes = await axios.get(`http://localhost:3001/api/users/public-key/${selectedRecipient}`, { withCredentials: true });
+            const keyRes = await axios.get(`/api/users/public-key/${selectedRecipient}`, { withCredentials: true });
             const recipientPubKey = keyRes.data.publicKey;
 
             if (!recipientPubKey) {
@@ -104,7 +104,7 @@ const SecureMessenger = ({ user }) => {
             }
 
             // 6. Transmit
-            await axios.post('http://localhost:3001/api/messages', {
+            await axios.post('/api/messages', {
                 recipientId: selectedRecipient,
                 encryptedContent: encryptedBody,
                 encryptedKey: encryptedKey,
@@ -190,7 +190,7 @@ const SecureMessenger = ({ user }) => {
 
             {/* SYSTEM STATUS BAR */}
             <div className="mb-6 p-2 bg-black border-l-4 border-teal-500 font-mono text-sm text-teal-400 shadow-inner flex justify-between items-center">
-                <span>>> SYSTEM STATUS: {status}</span>
+                <span>&gt;&gt; SYSTEM STATUS: {status}</span>
                 {!keysLoaded && <span className="animate-spin text-teal-500 text-lg">⟳</span>}
             </div>
 

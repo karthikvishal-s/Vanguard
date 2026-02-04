@@ -179,7 +179,7 @@ const Dashboard = ({ user, onLogout }) => {
                     {user.role >= 2 && <NavBtn label="LOGISTICS DEPT" active={activeTab === 'logistics'} onClick={() => setActiveTab('logistics')} />}
                     {user.role >= 3 && <NavBtn label="SECURE VAULT" active={activeTab === 'vault'} onClick={() => { setActiveTab('vault'); fetchVault(); }} />}
                     {user.role >= 3 && <NavBtn label="COMMS: SIGN" active={activeTab === 'sign'} onClick={() => setActiveTab('sign')} />}
-                    {user.role >= 3 && <NavBtn label="COMMS: SIGN" active={activeTab === 'sign'} onClick={() => setActiveTab('sign')} />}
+
                     <NavBtn label="COMMS: VERIFY" active={activeTab === 'verify'} onClick={() => setActiveTab('verify')} />
 
                     <div className="my-4 border-t border-gray-700"></div>
@@ -234,10 +234,10 @@ const Dashboard = ({ user, onLogout }) => {
                                             <td>{u.roleName}</td>
                                             <td>
                                                 {u.role === 1 && (
-                                                    <button onClick={() => updateUserRole(u._id, 2)} className="btn btn-primary" style={{ fontSize: '0.8rem', padding: '0.5rem' }}>PROMOTE >> SERGEANT</button>
+                                                    <button onClick={() => updateUserRole(u._id, 2)} className="btn btn-primary" style={{ fontSize: '0.8rem', padding: '0.5rem' }}>PROMOTE &gt;&gt; SERGEANT</button>
                                                 )}
                                                 {u.role === 2 && (
-                                                    <button onClick={() => updateUserRole(u._id, 1)} className="btn btn-logout" style={{ fontSize: '0.8rem', padding: '0.5rem' }}>DEMOTE >> SOLDIER</button>
+                                                    <button onClick={() => updateUserRole(u._id, 1)} className="btn btn-logout" style={{ fontSize: '0.8rem', padding: '0.5rem' }}>DEMOTE &gt;&gt; SOLDIER</button>
                                                 )}
                                                 {u.role === 3 && <span style={{ color: 'var(--color-hud-dim)', fontSize: '0.8rem' }}>[ CLASSIFIED ]</span>}
                                             </td>

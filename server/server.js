@@ -186,7 +186,11 @@ app.post('/api/verify-otp', async (req, res) => {
         user.otp = null;
         await user.save();
 
+
+
         const token = jwt.sign({ id: user._id, username: user.username, role: user.role, roleName: user.roleName }, JWT_SECRET, { expiresIn: '10m' });
+
+
         res.cookie('token', token, { httpOnly: true, sameSite: 'lax' });
 
         res.json({
@@ -415,6 +419,10 @@ app.post('/api/verify', verifyToken, (req, res) => {
     }
 });
 
-app.listen(PORT, () => {
-    console.log(`Command Center Server running on port ${PORT}`);
-});
+if (require.main === module) {
+    app.listen(PORT, () => {
+        console.log(`Command Center Server running on port ${PORT}`);
+    });
+}
+
+module.exports = app;

@@ -352,3 +352,152 @@ body {
 .table tr:hover {
   background: rgba(255, 255, 255, 0.02);
 }
+
+/* AUTOMATICALLY ADDED UTILITIES */
+.list-square {
+  list-style-type: square;
+}
+
+
+.glow-text {
+  text-shadow: 0 0 8px currentColor;
+}
+
+/* ACCESS MATRIX STYLES */
+.access-matrix-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--color-hud-dim);
+  padding-bottom: 1rem;
+}
+
+.cyber-table-container {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.cyber-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+}
+
+.cyber-table th {
+  text-align: left;
+  padding: 1.25rem 1rem;
+  border-bottom: 2px solid var(--color-hud-cyan);
+  color: var(--color-hud-cyan);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-size: 0.85rem;
+  background: rgba(0, 243, 255, 0.05);
+}
+
+.cyber-table td {
+  padding: 1.25rem 1rem;
+  border-bottom: 1px solid var(--color-hud-dim);
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
+  vertical-align: top;
+  color: var(--color-hud-text);
+  transition: background 0.2s;
+}
+
+.cyber-table tr:last-child td {
+  border-bottom: none;
+}
+
+.cyber-table tr:hover td {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+/* Column Specifics */
+.col-clearance {
+  font-weight: bold;
+  font-size: 0.9rem;
+  letter-spacing: 1px;
+  width: 10%;
+}
+
+.col-designation {
+  font-weight: bold;
+  letter-spacing: 1px;
+  color: #fff;
+  width: 15%;
+}
+
+.col-privileges {
+  width: 50%;
+}
+
+.col-restriction {
+  width: 25%;
+}
+
+/* Level Colors */
+.text-level-1 {
+  color: #8899a6;
+}
+
+/* Muted Blue/Gray */
+.text-level-2 {
+  color: var(--color-hud-amber);
+}
+
+.text-level-3 {
+  color: var(--color-hud-red);
+  text-shadow: 0 0 5px rgba(255, 42, 42, 0.3);
+}
+
+/* Feature List */
+.cyber-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.cyber-list li {
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: flex-start;
+  line-height: 1.4;
+}
+
+.cyber-list li::before {
+  content: "▹";
+  margin-right: 0.75rem;
+  color: var(--color-hud-dim);
+  font-size: 0.8rem;
+  margin-top: 2px;
+}
+
+.cyber-list li.highlight {
+  color: #fff;
+}
+
+.cyber-list li.highlight::before {
+  color: var(--color-hud-cyan);
+  content: "▶";
+}
+
+.cyber-list li.danger-highlight {
+  color: #fff;
+}
+
+.cyber-list li.danger-highlight::before {
+  color: var(--color-hud-red);
+  content: "⚠";
+}
+
+/* Restriction Badges */
+.restriction-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border: 1px solid currentColor;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  background: rgba(0, 0, 0, 0.3);
+}
