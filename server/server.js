@@ -8,6 +8,7 @@ const QRCode = require('qrcode');
 const crypto = require('crypto');
 const mongoose = require('mongoose');
 const forge = require('node-forge');
+const nodemailer = require('nodemailer');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -28,6 +29,7 @@ mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/vanguard_mo
 // --- SCHEMAS ---
 const UserSchema = new mongoose.Schema({
     username: { type: String, required: true, unique: true },
+    email: { type: String, required: true, unique: true }, // Added email field
     password: { type: String, required: true },
     role: { type: Number, required: true, default: 1 }, // 1=Soldier, 2=Sergeant, 3=Colonel
     roleName: { type: String, required: true, default: 'SOLDIER' },
@@ -67,18 +69,18 @@ const seedUsers = async () => {
 
             const usersToSeed = [
                 // Requested Colonel
-                { username: 'vishal', password: vishalHash, role: 3, roleName: 'COLONEL' },
+                { username: 'vishal', email: 'karthikvishal1506@gmail.com', password: vishalHash, role: 3, roleName: 'COLONEL' },
                 // 3 Colonels
-                { username: 'colonel', password: pwhash, role: 3, roleName: 'COLONEL' },
-                { username: 'colonel_sheppard', password: pwhash, role: 3, roleName: 'COLONEL' },
-                { username: 'colonel_oneill', password: pwhash, role: 3, roleName: 'COLONEL' },
+                { username: 'colonel', email: 'colonel@vanguard.mil', password: pwhash, role: 3, roleName: 'COLONEL' },
+                { username: 'colonel_sheppard', email: 'sheppard@vanguard.mil', password: pwhash, role: 3, roleName: 'COLONEL' },
+                { username: 'colonel_oneill', email: 'oneill@vanguard.mil', password: pwhash, role: 3, roleName: 'COLONEL' },
                 // 4 Sergeants
-                { username: 'sergeant', password: pwhash, role: 2, roleName: 'SERGEANT' },
-                { username: 'sergeant_carter', password: pwhash, role: 2, roleName: 'SERGEANT' },
-                { username: 'sergeant_tealc', password: pwhash, role: 2, roleName: 'SERGEANT' },
-                { username: 'sergeant_jackson', password: pwhash, role: 2, roleName: 'SERGEANT' },
+                { username: 'sergeant', email: 'sergeant@vanguard.mil', password: pwhash, role: 2, roleName: 'SERGEANT' },
+                { username: 'sergeant_carter', email: 'carter@vanguard.mil', password: pwhash, role: 2, roleName: 'SERGEANT' },
+                { username: 'sergeant_tealc', email: 'tealc@vanguard.mil', password: pwhash, role: 2, roleName: 'SERGEANT' },
+                { username: 'sergeant_jackson', email: 'jackson@vanguard.mil', password: pwhash, role: 2, roleName: 'SERGEANT' },
                 // Default Soldier
-                { username: 'soldier', password: pwhash, role: 1, roleName: 'SOLDIER' }
+                { username: 'soldier', email: 'soldier@vanguard.mil', password: pwhash, role: 1, roleName: 'SOLDIER' }
             ];
 
             await User.insertMany(usersToSeed);
@@ -108,6 +110,32 @@ const encryptIntel = () => {
     encryptedVault = encrypted; // This is what is "stored"
 };
 encryptIntel();
+
+
+// --- EMAIL CONFIG ---
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+    }
+});
+
+const sendEmail = async (to, otp) => {
+    try {
+        await transporter.sendMail({
+            from: 'VANGUARD COMMAND <no-reply@vanguard.mil>',
+            to: to,
+            subject: 'SECURE AUTHENTICATION TOKEN',
+            text: `COMMAND ALERT\n\nYOUR 2FA CODE IS: ${otp}\n\nTHIS MESSAGE WILL SELF-DESTRUCT IN 5 MINUTES.`
+        });
+        console.log(`[EMAIL] SENT TO ${to}`);
+        return true;
+    } catch (err) {
+        console.error('[EMAIL ERROR]', err);
+        return false;
+    }
+};
 
 
 // --- HELPERS ---
@@ -165,9 +193,11 @@ app.post('/api/login', async (req, res) => {
         const otp = generateOTP();
         user.otp = otp;
         await user.save();
+
+        await sendEmail(user.email, otp);
         console.log(`[OTP] Generated for ${username}: ${otp}`);
 
-        res.json({ message: 'Credentials valid. Enter OTP sent to device.', step: '2FA' });
+        res.json({ message: 'Credentials valid. Secure token sent to secure email channel.', step: '2FA' });
     } catch (err) {
         res.status(500).json({ error: 'Server Error' });
     }
@@ -209,10 +239,13 @@ app.post('/api/logout', (req, res) => {
 
 // 2. Registration (New features)
 app.post('/api/register', async (req, res) => {
-    const { username, password } = req.body;
+    const { username, email, password } = req.body;
     try {
         const existing = await User.findOne({ username });
         if (existing) return res.status(400).json({ error: 'Username taken' });
+
+        const existingEmail = await User.findOne({ email });
+        if (existingEmail) return res.status(400).json({ error: 'Email already registered' });
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -222,6 +255,7 @@ app.post('/api/register', async (req, res) => {
         // Default role is 1 (Soldier)
         const newUser = new User({
             username,
+            email,
             password: hashedPassword,
             role: 1,
             roleName: 'SOLDIER',

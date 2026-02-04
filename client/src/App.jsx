@@ -5,6 +5,7 @@ function App() {
   const [user, setUser] = useState(null);
   const [step, setStep] = useState('login'); // login, register, 2fa, dashboard
   const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [otp, setOtp] = useState('');
   const [error, setError] = useState('');
@@ -104,7 +105,7 @@ function App() {
       const res = await fetch('/api/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password })
+        body: JSON.stringify({ username, email, password })
       });
       const data = await res.json();
 
@@ -152,6 +153,7 @@ function App() {
     setUser(null);
     setStep('login');
     setUsername('');
+    setEmail('');
     setPassword('');
     setOtp('');
     setTypedTitle('');
@@ -201,6 +203,19 @@ function App() {
                 autoComplete="off"
               />
             </div>
+            {step === 'register' && (
+              <div>
+                <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: '0.5rem', color: 'var(--color-hud-dim)', letterSpacing: '0.1rem' }}>SECURE COMM CHANNEL (EMAIL)</label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  className="input-field"
+                  placeholder="ENTER EMAIL ADDRESS"
+                  autoComplete="off"
+                />
+              </div>
+            )}
             <div>
               <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: '0.5rem', color: 'var(--color-hud-dim)', letterSpacing: '0.1rem' }}>ACCESS CODE</label>
               <input
