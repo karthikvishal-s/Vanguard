@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import CryptoJS from 'crypto-js';
 import AccessMatrix from './AccessMatrix';
 import SecureMessenger from './SecureMessenger';
+import QREncoder from './QREncoder';
 
 const Dashboard = ({ user, onLogout }) => {
     const [activeTab, setActiveTab] = useState('overview');
@@ -9,7 +10,7 @@ const Dashboard = ({ user, onLogout }) => {
     const [decryptedIntel, setDecryptedIntel] = useState(null);
     const [logistics, setLogistics] = useState([]);
     const [usersList, setUsersList] = useState([]);
-    const [qrCode, setQrCode] = useState(null);
+    // const [qrCode, setQrCode] = useState(null); // Removed
     const [signMessage, setSignMessage] = useState('');
     const [signatureResult, setSignatureResult] = useState(null);
     const [verifyMessage, setVerifyMessage] = useState('');
@@ -19,19 +20,8 @@ const Dashboard = ({ user, onLogout }) => {
     const [successMsg, setSuccessMsg] = useState('');
 
     useEffect(() => {
-        if (user.role >= 1) fetchQr();
         if (user.role >= 2) fetchLogistics();
     }, [user]);
-
-    const fetchQr = async () => {
-        try {
-            const res = await fetch('http://localhost:3001/api/me', { credentials: 'include' });
-            const data = await res.json();
-            if (data.qrCode) setQrCode(data.qrCode);
-        } catch (err) {
-            console.error(err);
-        }
-    };
 
     const fetchLogistics = async () => {
         try {
@@ -185,6 +175,7 @@ const Dashboard = ({ user, onLogout }) => {
                     <div className="my-4 border-t border-gray-700"></div>
 
                     {user.role >= 2 && <NavBtn label="SECURE UPLINK" active={activeTab === 'messenger'} onClick={() => setActiveTab('messenger')} />}
+                    <NavBtn label="DATA LINK (QR)" active={activeTab === 'qr'} onClick={() => setActiveTab('qr')} />
                     <NavBtn label="SECURITY BOARD" active={activeTab === 'matrix'} onClick={() => setActiveTab('matrix')} />
 
                     <div style={{ marginTop: 'auto', padding: '1rem', border: '1px dashed var(--color-hud-dim)', color: 'var(--color-hud-dim)', fontSize: '0.7rem' }}>
@@ -252,9 +243,9 @@ const Dashboard = ({ user, onLogout }) => {
                         <div>
                             <h2 className="text-accent uppercase" style={{ marginBottom: '2rem', borderBottom: '1px solid var(--color-hud-dim)', paddingBottom: '0.5rem' }}>// SERVICE RECORD</h2>
                             <div style={{ display: 'flex', gap: '3rem', alignItems: 'flex-start', flexWrap: 'wrap' }}>
-                                <div style={{ backgroundColor: 'white', padding: '1rem', borderRadius: '4px' }}>
+                                {/* <div style={{ backgroundColor: 'white', padding: '1rem', borderRadius: '4px' }}>
                                     {qrCode ? <img src={qrCode} alt="ID QR Code" style={{ width: '200px', height: '200px' }} /> : "Generating ID..."}
-                                </div>
+                                </div> */}
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', flex: 1 }}>
                                     <Detail label="OPERATIVE NAME" value={user.username} />
                                     <Detail label="CURRENT RANK" value={user.roleName} />
@@ -421,6 +412,18 @@ const Dashboard = ({ user, onLogout }) => {
                     {activeTab === 'messenger' && (
                         <div className="pt-5">
                             <SecureMessenger user={user} />
+                        </div>
+                    )}
+
+                    {activeTab === 'qr' && (
+                        <div>
+                            <h2 className="text-accent uppercase" style={{ marginBottom: '2rem', borderBottom: '1px solid var(--color-hud-dim)', paddingBottom: '0.5rem' }}>// OPTICAL DATA LINK</h2>
+                            <div className="flex justify-center">
+                                <div className="w-full max-w-md">
+                                    <h3 className="text-accent mb-4 border-l-4 border-cyan-500 pl-2">ENCODE TRANSMISSION</h3>
+                                    <QREncoder />
+                                </div>
+                            </div>
                         </div>
                     )}
 
