@@ -490,6 +490,8 @@ app.get('/api/logistics', verifyToken, requireRole(2), (req, res) => {
     });
 });
 
+
+
 app.post('/api/sign', verifyToken, requireRole(3), (req, res) => {
     const { message } = req.body;
     if (!message) return res.status(400).json({ error: 'Message required' });
@@ -509,6 +511,9 @@ app.post('/api/verify', verifyToken, (req, res) => {
         res.json({ valid: false, status: 'WARNING: TAMPERING DETECTED. Signature Invalid.' });
     }
 });
+
+
+
 
 if (require.main === module) {
     app.listen(PORT, () => {
